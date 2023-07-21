@@ -25,5 +25,5 @@ if [[ $BUILD = YES ]]; then
 fi
 
 if [[ $RUN = YES ]]; then
-    docker run -u $USER_NAME:$USER_NAME --rm --init --privileged -u$(id -u):$(id -g) --network host -p 4200:4200 -v ~/projects:/home/devel/projects -ti image-angular-base:latest bash
+    docker run -u $USER_NAME:$USER_NAME --rm --init --privileged -u$(id -u):$(id -g) --network host -p 2222:2222 -p 4200:4200 -v ~/projects:/home/devel/projects -ti image-angular-base:latest
 fi

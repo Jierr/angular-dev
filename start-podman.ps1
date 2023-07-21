@@ -1,0 +1,1 @@
+podman run --rm --init --privileged --security-opt seccomp=unconfined --network host -p  2222:2222 -p 4200:4200 --userns=keep-id -v /home/user:/home/devel -v C:\Users\miscp\projects:/home/devel/win-projects -ti image-angular-base:latest

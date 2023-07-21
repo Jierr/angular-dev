@@ -1,5 +1,5 @@
 FROM ubuntu:jammy as image-angular-base
-LABEL Description="Development Base Container with Ubuntu 20.04 LTS - For Angular and typescript development"
+LABEL Description="Development Base Container with Ubuntu 22.04 LTS - For Angular and typescript development"
 
 ENV USER_NAME=devel
 ENV USER_ID=1000
@@ -14,7 +14,7 @@ WORKDIR /work
 USER root
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y install \
-    sudo debianutils build-essential cmake dbus iputils-ping git curl ssh locales vim 
+    sudo debianutils build-essential cmake dbus iputils-ping git curl locales vim 
 
 RUN rm /bin/sh && ln -s bash /bin/sh
 RUN locale-gen en_US.utf8 en_GB.utf8 de_DE.utf8 && update-locale
@@ -31,10 +31,12 @@ RUN mkdir -p /var/run/user/$USER_NAME && \
 
 # Taken from - https://docs.docker.com/engine/examples/running_ssh_service/#environment-variables
 # SSH login fix. Otherwise user is kicked off after login
-RUN mkdir /var/run/sshd && \
+RUN apt-get -y install openssh-server openssh-client && mkdir /var/run/sshd && \
   echo 'root:root' | chpasswd && \
   sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+  sudo sed -i 's/^.\?Port.*/Port 2222/' /etc/ssh/sshd_config && \
   sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+RUN ssh-keygen -A && update-rc.d ssh defaults && /etc/init.d/ssh restart
   
 # Update Node PPA
 RUN curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh && chmod 755 nodesource_setup.sh && ./nodesource_setup.sh
@@ -45,3 +47,5 @@ RUN npm install -g typescript @angular/cli
 
 USER $USER_NAME
 WORKDIR /home/$USER_NAME
+
+ENTRYPOINT sudo /etc/init.d/ssh restart && bash
