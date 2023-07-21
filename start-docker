@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+USER_NAME=vmp
+
+for i in "$@"; do
+  case $i in
+    --build)
+      BUILD=YES
+      shift # past argument with no value
+      ;;
+    --run)
+      RUN=YES
+      shift # past argument with no value
+      ;;
+    -*|--*)
+      echo "Unknown option $i"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
+
+if [[ $BUILD = YES ]]; then
+    docker build -t image-angular-base:latest devenv
+fi
+
+if [[ $RUN = YES ]]; then
+    docker run -u $USER_NAME:$USER_NAME --rm --init --privileged -u$(id -u):$(id -g) --network host -p 4200:4200 -v ~/projects:/home/devel/projects -ti image-angular-base:latest bash
+fi
